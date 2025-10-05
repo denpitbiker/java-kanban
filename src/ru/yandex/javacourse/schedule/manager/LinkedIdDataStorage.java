@@ -5,42 +5,42 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class can store DATA linked by ID of this DATA, using combination of
- * HashMap and custom linked list implementation for O(1) remove(ID) operation support.
+ * This class can store Data linked by Id of this Data, using combination of
+ * HashMap and custom linked list implementation for O(1) remove(Id) operation support.
  */
-class LinkedIdDataStorage<DATA, ID> {
-    private final Map<ID, Node> _ids = new HashMap<>();
+class LinkedIdDataStorage<Data, Id> {
+    private final Map<Id, Node> ids = new HashMap<>();
     private Node tail = null;
     private Node head = null;
     private int size = 0;
 
     /**
-     * Add a new DATA to the storage with ID associated with data.
-     * NOTE: id must be unique, otherwise DATA will replace existing data with the same ID.
+     * Add a new Data to the storage with Id associated with data.
+     * NOTE: id must be unique, otherwise Data will replace existing data with the same Id.
      */
-    void add(DATA data, ID dataId) {
+    void add(Data data, Id dataId) {
         if (data == null || dataId == null) return;
-        if (_ids.containsKey(dataId)) {
-            removeNode(_ids.get(dataId));
+        if (ids.containsKey(dataId)) {
+            removeNode(ids.get(dataId));
         }
-        _ids.put(dataId, addNode(data));
+        ids.put(dataId, addNode(data));
     }
 
     /**
-     * Remove data associated with ID.
+     * Remove data associated with Id.
      */
-    void remove(ID id) {
+    void remove(Id id) {
         if (id == null) return;
-        if (_ids.containsKey(id)) {
-            removeNode(_ids.remove(id));
+        if (ids.containsKey(id)) {
+            removeNode(ids.remove(id));
         }
     }
 
     /**
      * Returns ArrayList representation of stored data.
      */
-    ArrayList<DATA> getIndexedItems() {
-        ArrayList<DATA> result = new ArrayList<>();
+    ArrayList<Data> getIndexedItems() {
+        ArrayList<Data> result = new ArrayList<>();
         Node tmp = tail;
         while (tmp != null) {
             result.add(tmp.data);
@@ -49,7 +49,7 @@ class LinkedIdDataStorage<DATA, ID> {
         return result;
     }
 
-    private Node addNode(DATA data) {
+    private Node addNode(Data data) {
         Node newNode = new Node(null, null, data);
         if (size == 0) {
             tail = newNode;
@@ -87,9 +87,9 @@ class LinkedIdDataStorage<DATA, ID> {
     private class Node {
         Node prev;
         Node next;
-        DATA data;
+        Data data;
 
-        Node(Node prev, Node next, DATA data) {
+        Node(Node prev, Node next, Data data) {
             this.prev = prev;
             this.next = next;
             this.data = data;
