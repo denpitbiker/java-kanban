@@ -3,7 +3,7 @@ package ru.yandex.javacourse.schedule.tasks;
 import java.util.Objects;
 
 public class Task {
-	protected int id;
+	protected Integer id;
 	protected String name;
 	protected TaskStatus status;
 	protected String description;
@@ -21,11 +21,12 @@ public class Task {
 		this.status = status;
 	}
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(int id) throws IdAlreadySetException {
+		if (this.id != null) throw new IdAlreadySetException(this.id);
 		this.id = id;
 	}
 
@@ -55,7 +56,7 @@ public class Task {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id);
+		return id.hashCode();
 	}
 
 	@Override
@@ -63,7 +64,7 @@ public class Task {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		Task task = (Task) o;
-		return id == task.id;
+		return Objects.equals(id, task.id);
 	}
 
 	@Override

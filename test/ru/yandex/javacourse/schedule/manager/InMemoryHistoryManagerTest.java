@@ -12,28 +12,29 @@ public class InMemoryHistoryManagerTest {
     HistoryManager historyManager;
 
     @BeforeEach
-    public void initHistoryManager(){
+    public void initHistoryManager() {
         historyManager = Managers.getDefaultHistory();
     }
 
     @Test
-    public void testHistoricVersions(){
-        Task task = new Task("Test 1", "Testiong task 1", TaskStatus.NEW);
+    public void testHistoricVersions() {
+        Task task = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
         historyManager.addTask(task);
         assertEquals(1, historyManager.getHistory().size(), "historic task should be added");
-        task.setStatus(TaskStatus.IN_PROGRESS);
-        historyManager.addTask(task);
+        Task task2 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW);
+        historyManager.addTask(task2);
         assertEquals(2, historyManager.getHistory().size(), "historic task should be added");
     }
 
     @Test
-    public void testHistoricVersionsByPointer(){
-        Task task = new Task("Test 1", "Testiong task 1", TaskStatus.NEW);
+    public void testHistoricVersionsByPointer() {
+        Task task = new Task(1, "Test 1", "Testing task 1", TaskStatus.NEW);
         historyManager.addTask(task);
         assertEquals(task.getStatus(), historyManager.getHistory().getFirst().getStatus(), "historic task should be stored");
         task.setStatus(TaskStatus.IN_PROGRESS);
         historyManager.addTask(task);
-        assertEquals(TaskStatus.NEW, historyManager.getHistory().getFirst().getStatus(), "historic task should not be changed");
+        assertEquals(TaskStatus.IN_PROGRESS, historyManager.getHistory().getFirst().getStatus(), "historic task should be changed");
+        assertEquals(1, historyManager.getHistory().size(), "no task duplicate should exist");
     }
 
 }
