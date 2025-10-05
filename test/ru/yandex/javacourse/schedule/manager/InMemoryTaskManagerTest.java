@@ -78,4 +78,29 @@ public class InMemoryTaskManagerTest {
         assertEquals(1, epic.getSubtaskIds().size(), "must be only one id");
         assertEquals(3, epic.getSubtaskIds().getFirst(), "must be subtask with id 3");
     }
+
+    @Test
+    public void testClean() {
+        Task task0 = new Task("Test 1", "Testing task 1", TaskStatus.NEW);
+        Task task1 = new Task(2, "Test 2", "Testing task 2", TaskStatus.NEW);
+        manager.addNewTask(task0);
+        manager.addNewTask(task1);
+        Subtask task3 = new Subtask(3, "Test 3", "Testing task 3", TaskStatus.NEW, 5);
+        Subtask task4 = new Subtask(4, "Test 4", "Testing task 3", TaskStatus.NEW, 5);
+        Epic epic = new Epic(5, "Epic", ":0");
+        manager.addNewTask(task0);
+        manager.addNewTask(task1);
+        manager.addNewEpic(epic);
+        manager.addNewSubtask(task3);
+        manager.addNewSubtask(task4);
+        assertEquals(2, manager.getTasks().size(), "Must be 2 tasks");
+        assertEquals(2, manager.getSubtasks().size(), "Must be 2 subtasks");
+        assertEquals(1, manager.getEpics().size(), "Must be 1 epic");
+        manager.deleteTasks();
+        assertEquals(0, manager.getTasks().size(), "Must be 0 tasks");
+        manager.deleteSubtasks();
+        assertEquals(0, manager.getSubtasks().size(), "Must be 0 subtasks");
+        manager.deleteEpics();
+        assertEquals(0, manager.getEpics().size(), "Must be 0 epics");
+    }
 }
