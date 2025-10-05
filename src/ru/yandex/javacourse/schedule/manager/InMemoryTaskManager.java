@@ -73,7 +73,7 @@ public class InMemoryTaskManager implements TaskManager {
 	@Override
 	public int addNewTask(Task task) {
 		if (task.getId() == null) {
-			task.setId(getUniqueRandomId());
+			task.setId(getUniqueId());
 		}
 		final int id = task.getId();
 		tasks.put(id, task);
@@ -83,7 +83,7 @@ public class InMemoryTaskManager implements TaskManager {
 	@Override
 	public int addNewEpic(Epic epic) {
 		if (epic.getId() == null) {
-			epic.setId(getUniqueRandomId());
+			epic.setId(getUniqueId());
 		}
 		final int id = epic.getId();
 		epics.put(id, epic);
@@ -98,7 +98,7 @@ public class InMemoryTaskManager implements TaskManager {
 			return null;
 		}
 		if (subtask.getId() == null) {
-			subtask.setId(getUniqueRandomId());
+			subtask.setId(getUniqueId());
 		}
 		final int id = subtask.getId();
 		subtasks.put(id, subtask);
@@ -208,7 +208,7 @@ public class InMemoryTaskManager implements TaskManager {
 		return historyManager.getHistory();
 	}
 
-	private int getUniqueRandomId() {
+	private int getUniqueId() {
 		int id = 1;
 		while (tasks.containsKey(id) || epics.containsKey(id) || subtasks.containsKey(id)) {
 			id++;

@@ -51,15 +51,16 @@ class LinkedIdDataStorage<DATA, ID> {
 
     private Node addNode(DATA data) {
         Node newNode = new Node(null, null, data);
-        if (size++ == 0) {
+        if (size == 0) {
             tail = newNode;
-        } else if (size++ == 1) {
+        } else if (size == 1) {
             newNode.prev = tail;
             tail.next = newNode;
         } else {
             head.next = newNode;
             newNode.prev = head;
         }
+        size++;
         head = newNode;
         return newNode;
     }
@@ -67,11 +68,18 @@ class LinkedIdDataStorage<DATA, ID> {
     private void removeNode(Node node) {
         Node prev = node.prev;
         Node next = node.next;
-        if (prev != null) prev.next = next;
-        if (next != null) next.prev = prev;
         if (size == 1) {
             tail = null;
             head = null;
+        } else if (size == 2) {
+            if (prev == null) {
+                tail = head;
+            } else {
+                head = tail;
+            }
+        } else {
+            if (prev != null) prev.next = next;
+            if (next != null) next.prev = prev;
         }
         size--;
     }

@@ -2,6 +2,8 @@ package ru.yandex.javacourse.schedule.manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.javacourse.schedule.tasks.Epic;
+import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.Task;
 import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
@@ -60,5 +62,20 @@ public class InMemoryTaskManagerTest {
         assertEquals(description, task1after.getDescription());
         assertEquals(status, task1after.getStatus());
         assertEquals(name, task1after.getName());
+    }
+
+    @Test
+    public void testOldIdSubtaskInEpic() {
+        Subtask subtask = new Subtask(1, "Test 1", "Testing task 1", TaskStatus.NEW, 2);
+        Subtask subtask2 = new Subtask(3, "Test 3", "Testing task 3", TaskStatus.NEW, 2);
+        Epic epic = new Epic(2, "Epic", "Testing epic 2");
+        manager.addNewEpic(epic);
+        int subtaskId = manager.addNewSubtask(subtask);
+        assertEquals(1, subtaskId, "predefined id must be equal");
+        manager.addNewSubtask(subtask2);
+        manager.deleteSubtask(subtask.getId());
+        epic = manager.getEpic(epic.getId());
+        assertEquals(1, epic.getSubtaskIds().size(), "must be only one id");
+        assertEquals(3, epic.getSubtaskIds().getFirst(), "must be subtask with id 3");
     }
 }
