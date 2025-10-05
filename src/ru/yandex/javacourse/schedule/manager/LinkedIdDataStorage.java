@@ -8,8 +8,8 @@ import java.util.Map;
  * This class can store Data linked by Id of this Data, using combination of
  * HashMap and custom linked list implementation for O(1) remove(Id) operation support.
  */
-class LinkedIdDataStorage<Data, Id> {
-    private final Map<Id, Node> ids = new HashMap<>();
+class LinkedIdDataStorage<D, I> {
+    private final Map<I, Node> ids = new HashMap<>();
     private Node tail = null;
     private Node head = null;
     private int size = 0;
@@ -18,7 +18,7 @@ class LinkedIdDataStorage<Data, Id> {
      * Add a new Data to the storage with Id associated with data.
      * NOTE: id must be unique, otherwise Data will replace existing data with the same Id.
      */
-    void add(Data data, Id dataId) {
+    void add(D data, I dataId) {
         if (data == null || dataId == null) return;
         if (ids.containsKey(dataId)) {
             removeNode(ids.get(dataId));
@@ -29,7 +29,7 @@ class LinkedIdDataStorage<Data, Id> {
     /**
      * Remove data associated with Id.
      */
-    void remove(Id id) {
+    void remove(I id) {
         if (id == null) return;
         if (ids.containsKey(id)) {
             removeNode(ids.remove(id));
@@ -39,8 +39,8 @@ class LinkedIdDataStorage<Data, Id> {
     /**
      * Returns ArrayList representation of stored data.
      */
-    ArrayList<Data> getIndexedItems() {
-        ArrayList<Data> result = new ArrayList<>();
+    ArrayList<D> getIndexedItems() {
+        ArrayList<D> result = new ArrayList<>();
         Node tmp = tail;
         while (tmp != null) {
             result.add(tmp.data);
@@ -49,7 +49,7 @@ class LinkedIdDataStorage<Data, Id> {
         return result;
     }
 
-    private Node addNode(Data data) {
+    private Node addNode(D data) {
         Node newNode = new Node(null, null, data);
         if (size == 0) {
             tail = newNode;
@@ -87,9 +87,9 @@ class LinkedIdDataStorage<Data, Id> {
     private class Node {
         Node prev;
         Node next;
-        Data data;
+        D data;
 
-        Node(Node prev, Node next, Data data) {
+        Node(Node prev, Node next, D data) {
             this.prev = prev;
             this.next = next;
             this.data = data;
