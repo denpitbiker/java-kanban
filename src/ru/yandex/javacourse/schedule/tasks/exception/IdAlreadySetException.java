@@ -1,4 +1,4 @@
-package ru.yandex.javacourse.schedule.tasks;
+package ru.yandex.javacourse.schedule.tasks.exception;
 
 public class IdAlreadySetException extends RuntimeException {
     public IdAlreadySetException(int id) {

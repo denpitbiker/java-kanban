@@ -12,7 +12,6 @@ class LinkedIdDataStorage<D, I> {
     private final Map<I, Node> ids = new HashMap<>();
     private Node tail = null;
     private Node head = null;
-    private int size = 0;
 
     /**
      * Add a new Data to the storage with Id associated with data.
@@ -50,38 +49,28 @@ class LinkedIdDataStorage<D, I> {
     }
 
     private Node addNode(D data) {
-        Node newNode = new Node(null, null, data);
-        if (size == 0) {
-            tail = newNode;
-        } else if (size == 1) {
-            newNode.prev = tail;
-            tail.next = newNode;
-        } else {
+        Node newNode = new Node(head, null, data);
+        if (head != null) {
             head.next = newNode;
-            newNode.prev = head;
         }
-        size++;
         head = newNode;
+        if (tail == null) {
+            tail = newNode;
+        }
         return newNode;
     }
 
     private void removeNode(Node node) {
-        Node prev = node.prev;
-        Node next = node.next;
-        if (size == 1) {
-            tail = null;
-            head = null;
-        } else if (size == 2) {
-            if (prev == null) {
-                tail = head;
-            } else {
-                head = tail;
-            }
+        if (node.prev != null) {
+            node.prev.next = node.next;
         } else {
-            if (prev != null) prev.next = next;
-            if (next != null) next.prev = prev;
+            tail = node.next;
         }
-        size--;
+        if (node.next != null) {
+            node.next.prev = node.prev;
+        } else {
+            head = node.prev;
+        }
     }
 
     private class Node {

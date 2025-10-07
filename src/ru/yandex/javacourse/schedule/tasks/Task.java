@@ -1,5 +1,7 @@
 package ru.yandex.javacourse.schedule.tasks;
 
+import ru.yandex.javacourse.schedule.tasks.exception.IdAlreadySetException;
+
 import java.util.Objects;
 
 public class Task {
