@@ -1,5 +1,6 @@
 package ru.yandex.javacourse.schedule.manager;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,9 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class ManagersTest {
 
     @Test
-    public void testDefaultManagersNotNull() {
-        assertNotNull(Managers.getDefault(), "default manager should not be null");
-        assertNotNull(Managers.getDefaultHistory(), "default history managers should not be null");
+    @DisplayName("Проверка существования стандартной реализации менеджера истории задач")
+    public void getDefaultHistoryManager_GetDefaultHistoryManager_ReturnHistoryManagerManager() {
+        assertNotNull(Managers.getDefaultHistoryManager(), "default history managers should not be null");
     }
 
+    @Test
+    @DisplayName("Проверка существования стандартной реализации менеджера задач")
+    public void getDefaultTaskManager_GetDefaultTaskManager_ReturnTaskManager() {
+        assertNotNull(Managers.getDefaultTaskManager(), "default manager should not be null");
+    }
 }
