@@ -14,8 +14,8 @@ import java.io.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FileBackedTaskManagerTest {
-    private final static String TEMP_FILE_SUFFIX = ".txt";
-    private final static String TEST_FILE_CONTENT = """
+    private static final String TEMP_FILE_SUFFIX = ".txt";
+    private static final String TEST_FILE_CONTENT = """
             S,4,Test 1,N,Description 1,5\
             
             S,3,Test 3,N,Description 3,5\

@@ -103,8 +103,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private void load() {
         try (BufferedReader fileReader = new BufferedReader(new FileReader(tasksFile))) {
             List<Subtask> parsedSubtasks = new LinkedList<>();
-            fileReader.lines().forEach((line) ->
-            {
+            fileReader.lines().forEach((line) -> {
                 Task parsedTask = parseTask(line);
                 if (parsedTask instanceof Epic) {
                     addNewEpic((Epic) parsedTask);
@@ -258,13 +257,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private final static char SEPARATOR = ',';
-    private final static String NULL_STRING = "null";
+    private static final char SEPARATOR = ',';
+    private static final String NULL_STRING = "null";
 
-    private final static String TASK_TYPE_PART_NAME = "task type (class)";
-    private final static String TASK_ID_PART_NAME = "id";
-    private final static String TASK_NAME_PART_NAME = "name";
-    private final static String TASK_DESCRIPTION_PART_NAME = "description";
-    private final static String TASK_STATUS_PART_NAME = "status";
-    private final static String TASK_EPIC_ID_PART_NAME = "epicId";
+    private static final String TASK_TYPE_PART_NAME = "task type (class)";
+    private static final String TASK_ID_PART_NAME = "id";
+    private static final String TASK_NAME_PART_NAME = "name";
+    private static final String TASK_DESCRIPTION_PART_NAME = "description";
+    private static final String TASK_STATUS_PART_NAME = "status";
+    private static final String TASK_EPIC_ID_PART_NAME = "epicId";
 }
