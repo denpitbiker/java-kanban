@@ -5,7 +5,7 @@ import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Epic extends Task {
+public class Epic extends Task implements Cloneable {
 	protected ArrayList<Integer> subtaskIds = new ArrayList<>();
 
 	public Epic(int id, String name, String description) {
@@ -14,6 +14,16 @@ public class Epic extends Task {
 
 	public Epic(String name, String description) {
 		super(name, description, NEW);
+	}
+
+	private Epic(int id, String name, String description, TaskStatus status, ArrayList<Integer> subtaskIds) {
+		super(id, name, description, status);
+		subtaskIds.forEach(this::addSubtaskId);
+	}
+
+	private Epic(String name, String description, TaskStatus status, ArrayList<Integer> subtaskIds) {
+		super(name, description, status);
+		subtaskIds.forEach(this::addSubtaskId);
 	}
 
 	public void addSubtaskId(int id) {
@@ -42,5 +52,15 @@ public class Epic extends Task {
 				", description='" + description + '\'' +
 				", subtaskIds=" + subtaskIds +
 				'}';
+	}
+
+	@SuppressWarnings("MethodDoesntCallSuperMethod")
+	@Override
+	public Epic clone() {
+        if (id == null) {
+			return new Epic(name, description, status, subtaskIds);
+		} else {
+			return new Epic(id, name, description, status, subtaskIds);
+		}
 	}
 }

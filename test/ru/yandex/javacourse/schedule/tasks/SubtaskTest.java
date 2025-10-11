@@ -8,7 +8,7 @@ import ru.yandex.javacourse.schedule.tasks.exception.SameIdException;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SubtaskTest {
-    private final static String EXPECTED_MESSAGE = "epicId can't be the same with subtask id!";
+    private static final String EXPECTED_MESSAGE = "epicId can't be the same with subtask id!";
 
     @Test
     @DisplayName("Проверка, что подзадачи сравниваются по id")

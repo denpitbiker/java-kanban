@@ -3,10 +3,7 @@ package ru.yandex.javacourse.schedule.manager;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.IN_PROGRESS;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import ru.yandex.javacourse.schedule.tasks.Epic;
 import ru.yandex.javacourse.schedule.tasks.Subtask;
@@ -14,26 +11,24 @@ import ru.yandex.javacourse.schedule.tasks.Task;
 import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
 public class InMemoryTaskManager implements TaskManager {
-
-	private final Map<Integer, Task> tasks = new HashMap<>();
-	private final Map<Integer, Epic> epics = new HashMap<>();
-	private final Map<Integer, Subtask> subtasks = new HashMap<>();
+	protected final Map<Integer, Task> tasks = new HashMap<>();
+	protected final Map<Integer, Epic> epics = new HashMap<>();
+	protected final Map<Integer, Subtask> subtasks = new HashMap<>();
 	private final HistoryManager historyManager = Managers.getDefaultHistoryManager();
-
 
 	@Override
 	public ArrayList<Task> getTasks() {
-		return new ArrayList<>(this.tasks.values());
+		return new ArrayList<>(tasks.values().stream().map((Task::clone)).toList());
 	}
 
 	@Override
 	public ArrayList<Subtask> getSubtasks() {
-		return new ArrayList<>(subtasks.values());
+		return new ArrayList<>(subtasks.values().stream().map((Subtask::clone)).toList());
 	}
 
 	@Override
 	public ArrayList<Epic> getEpics() {
-		return new ArrayList<>(epics.values());
+		return new ArrayList<>(epics.values().stream().map((Epic::clone)).toList());
 	}
 
 	@Override
@@ -44,7 +39,7 @@ public class InMemoryTaskManager implements TaskManager {
 			return null;
 		}
 		for (int id : epic.getSubtaskIds()) {
-			tasks.add(subtasks.get(id));
+			tasks.add(subtasks.get(id).clone());
 		}
 		return tasks;
 	}
@@ -53,21 +48,21 @@ public class InMemoryTaskManager implements TaskManager {
 	public Task getTask(int id) {
 		final Task task = tasks.get(id);
 		historyManager.addTask(task);
-		return task;
+		return task.clone();
 	}
 
 	@Override
 	public Subtask getSubtask(int id) {
 		final Subtask subtask = subtasks.get(id);
 		historyManager.addTask(subtask);
-		return subtask;
+		return subtask.clone();
 	}
 
 	@Override
 	public Epic getEpic(int id) {
 		final Epic epic = epics.get(id);
 		historyManager.addTask(epic);
-		return epic;
+		return epic.clone();
 	}
 
 	@Override
@@ -215,7 +210,7 @@ public class InMemoryTaskManager implements TaskManager {
 
 	@Override
 	public List<Task> getHistory() {
-		return historyManager.getHistory();
+		return historyManager.getHistory().stream().map((Task::clone)).toList();
 	}
 
 	private int getUniqueId() {
@@ -241,8 +236,7 @@ public class InMemoryTaskManager implements TaskManager {
 				continue;
 			}
 
-			if (status == subtask.getStatus()
-					&& status != IN_PROGRESS) {
+			if (status == subtask.getStatus() && status != IN_PROGRESS) {
 				continue;
 			}
 			epic.setStatus(IN_PROGRESS);
