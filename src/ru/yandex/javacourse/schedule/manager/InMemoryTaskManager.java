@@ -73,7 +73,7 @@ public class InMemoryTaskManager implements TaskManager {
 			return null;
 		}
 		final int id = task.getId();
-		tasks.put(id, task);
+		tasks.put(id, task.clone());
 		return id;
 	}
 
@@ -85,7 +85,7 @@ public class InMemoryTaskManager implements TaskManager {
 			return null;
 		}
 		final int id = epic.getId();
-		epics.put(id, epic);
+		epics.put(id, epic.clone());
 		return id;
 	}
 
@@ -102,7 +102,7 @@ public class InMemoryTaskManager implements TaskManager {
 			return null;
 		}
 		final int id = subtask.getId();
-		subtasks.put(id, subtask);
+		subtasks.put(id, subtask.clone());
 		epic.addSubtaskId(id);
 		updateEpicStatus(epicId);
 		return id;
@@ -114,7 +114,7 @@ public class InMemoryTaskManager implements TaskManager {
 		if (id == null) return;
 		final Task savedTask = tasks.get(id);
 		if (savedTask == null) return;
-		tasks.put(id, task);
+		tasks.put(id, task.clone());
 	}
 
 	@Override
@@ -146,7 +146,7 @@ public class InMemoryTaskManager implements TaskManager {
 		if (epic == null) {
 			return;
 		}
-		subtasks.put(id, subtask);
+		subtasks.put(id, subtask.clone());
 		updateEpicStatus(epicId);
 	}
 
