@@ -3,6 +3,8 @@ package ru.yandex.javacourse.schedule.manager;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.IN_PROGRESS;
 import static ru.yandex.javacourse.schedule.tasks.TaskStatus.NEW;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import ru.yandex.javacourse.schedule.tasks.Epic;
@@ -104,7 +106,7 @@ public class InMemoryTaskManager implements TaskManager {
 		final int id = subtask.getId();
 		subtasks.put(id, subtask.clone());
 		epic.addSubtaskId(id);
-		updateEpicStatus(epicId);
+		refreshEpicState(epicId);
 		return id;
 	}
 
@@ -147,7 +149,7 @@ public class InMemoryTaskManager implements TaskManager {
 			return;
 		}
 		subtasks.put(id, subtask.clone());
-		updateEpicStatus(epicId);
+		refreshEpicState(epicId);
 	}
 
 	@Override
@@ -173,7 +175,7 @@ public class InMemoryTaskManager implements TaskManager {
 		historyManager.remove(id);
 		Epic epic = epics.get(subtask.getEpicId());
 		epic.removeSubtask(id);
-		updateEpicStatus(epic.getId());
+		refreshEpicState(epic.getId());
 	}
 
 	@Override
@@ -188,7 +190,7 @@ public class InMemoryTaskManager implements TaskManager {
 	public void deleteSubtasks() {
 		for (Epic epic : epics.values()) {
 			epic.cleanSubtaskIds();
-			updateEpicStatus(epic.getId());
+			refreshEpicState(epic.getId());
 		}
 		for (Task t : subtasks.values()) {
 			historyManager.remove(t.getId());
@@ -221,7 +223,7 @@ public class InMemoryTaskManager implements TaskManager {
 		return id;
 	}
 
-	private void updateEpicStatus(int epicId) {
+	private void refreshEpicState(int epicId) {
 		Epic epic = epics.get(epicId);
 		List<Integer> subs = epic.getSubtaskIds();
 		if (subs.isEmpty()) {
@@ -229,8 +231,24 @@ public class InMemoryTaskManager implements TaskManager {
 			return;
 		}
 		TaskStatus status = null;
+		LocalDateTime epicStartTime = null;
+		LocalDateTime epicEndTime = null;
+		Duration epicDuration = null;
 		for (int id : subs) {
 			final Subtask subtask = subtasks.get(id);
+			if (epicStartTime == null || subtask.getStartTime() != null && epicStartTime.isAfter(subtask.getStartTime())) {
+				epicStartTime = subtask.getStartTime();
+			}
+			if (epicEndTime == null || subtask.getEndTime() != null && epicEndTime.isBefore(subtask.getEndTime())) {
+				epicEndTime = subtask.getEndTime();
+			}
+			if (subtask.getDuration() != null) {
+				if (epicDuration == null) {
+					epicDuration = subtask.getDuration();
+				} else {
+					epicDuration = epicDuration.plus(subtask.getDuration());
+				}
+			}
 			if (status == null) {
 				status = subtask.getStatus();
 				continue;
@@ -243,5 +261,8 @@ public class InMemoryTaskManager implements TaskManager {
 			return;
 		}
 		epic.setStatus(status);
+		epic.setStartTime(epicStartTime);
+		epic.setDuration(epicDuration);
+		epic.setEndTime(epicEndTime);
 	}
 }

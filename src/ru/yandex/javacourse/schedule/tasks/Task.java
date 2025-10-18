@@ -2,6 +2,8 @@ package ru.yandex.javacourse.schedule.tasks;
 
 import ru.yandex.javacourse.schedule.tasks.exception.IdAlreadySetException;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task implements Cloneable {
@@ -9,18 +11,31 @@ public class Task implements Cloneable {
     protected String name;
     protected TaskStatus status;
     protected String description;
+    protected Duration duration;
+    protected LocalDateTime startTime;
 
-    public Task(int id, String name, String description, TaskStatus status) {
+    public Task(
+            int id,
+            String name,
+            String description,
+            TaskStatus status,
+            Duration duration,
+            LocalDateTime startTime
+    ) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.status = status;
+        this.duration = duration;
+        this.startTime = startTime;
     }
 
-    public Task(String name, String description, TaskStatus status) {
+    public Task(String name, String description, TaskStatus status, Duration duration, LocalDateTime startTime) {
         this.name = name;
         this.description = description;
         this.status = status;
+        this.duration = duration;
+        this.startTime = startTime;
     }
 
     public Integer getId() {
@@ -56,6 +71,27 @@ public class Task implements Cloneable {
         this.description = description;
     }
 
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        if (startTime == null || duration == null) return null;
+        return startTime.plus(duration);
+    }
+
     @Override
     public int hashCode() {
         return id.hashCode();
@@ -85,9 +121,9 @@ public class Task implements Cloneable {
             return (Task) super.clone();
         } catch (CloneNotSupportedException e) {
             if (id == null) {
-                return new Task(name, description, status);
+                return new Task(name, description, status, duration, startTime);
             } else {
-                return new Task(id, name, description, status);
+                return new Task(id, name, description, status, duration, startTime);
             }
         }
     }
