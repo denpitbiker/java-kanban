@@ -10,6 +10,9 @@ import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -163,6 +166,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         sb.append(SEPARATOR);
         sb.append(task.getDescription());
         sb.append(SEPARATOR);
+        if (task.getStartTime() != null) {
+            sb.append(task.getStartTime().toString());
+        } else {
+            sb.append(NULL_STRING);
+        }
+        sb.append(SEPARATOR);
+        if (task.getDuration() != null) {
+            sb.append(task.getDuration().toString());
+        } else {
+            sb.append(NULL_STRING);
+        }
+        sb.append(SEPARATOR);
         if (task instanceof Subtask) {
             sb.append(((Subtask) task).getEpicId());
         }
@@ -176,6 +191,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         Integer id;
         TaskStatus status;
         String description;
+        Duration duration;
+        LocalDateTime startTime;
         String epicId;
         Task task;
 
@@ -202,6 +219,29 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             throw new TaskParsingException(TASK_STATUS_PART_NAME, serializedTask);
         }
 
+        try {
+            String parsedStartTimeString = parseTaskPartOrThrow(taskParts, TASK_START_TIME_PART_NAME, 5);
+            if (parsedStartTimeString.equals(NULL_STRING)) {
+                startTime = null;
+            } else {
+                startTime = LocalDateTime.parse(parsedStartTimeString);
+            }
+        } catch (DateTimeParseException e) {
+            throw new TaskParsingException(TASK_START_TIME_PART_NAME, serializedTask);
+        }
+
+        try {
+            String parsedDurationString = parseTaskPartOrThrow(taskParts, TASK_DURATION_PART_NAME, 6);
+            if (parsedDurationString.equals(NULL_STRING)) {
+                duration = null;
+            } else {
+                duration = Duration.parse(parsedDurationString);
+            }
+        } catch (DateTimeParseException e) {
+            throw new TaskParsingException(TASK_DURATION_PART_NAME, serializedTask);
+        }
+
+
         name = parseTaskPartOrThrow(taskParts, TASK_NAME_PART_NAME, 2);
         description = parseTaskPartOrThrow(taskParts, TASK_DESCRIPTION_PART_NAME, 4);
 
@@ -209,10 +249,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             task = new Epic(name, description);
             task.setStatus(status);
         } else if (type == 'S') {
-            epicId = parseTaskPartOrThrow(taskParts, TASK_EPIC_ID_PART_NAME, 5);
-            task = new Subtask(name, description, status, Integer.parseInt(epicId));
+            epicId = parseTaskPartOrThrow(taskParts, TASK_EPIC_ID_PART_NAME, 7);
+            task = new Subtask(name, description, status, duration, startTime, Integer.parseInt(epicId));
         } else {
-            task = new Task(name, description, status);
+            task = new Task(name, description, status, duration, startTime);
         }
         if (id != null) {
             task.setId(id);
@@ -265,5 +305,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private static final String TASK_NAME_PART_NAME = "name";
     private static final String TASK_DESCRIPTION_PART_NAME = "description";
     private static final String TASK_STATUS_PART_NAME = "status";
+    private static final String TASK_START_TIME_PART_NAME = "start time";
+    private static final String TASK_DURATION_PART_NAME = "duration";
     private static final String TASK_EPIC_ID_PART_NAME = "epicId";
 }

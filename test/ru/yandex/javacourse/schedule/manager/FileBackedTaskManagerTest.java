@@ -1,5 +1,6 @@
 package ru.yandex.javacourse.schedule.manager;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.yandex.javacourse.schedule.TaskStubs;
@@ -13,26 +14,38 @@ import java.io.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FileBackedTaskManagerTest {
+public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     private static final String TEMP_FILE_SUFFIX = ".txt";
     private static final String TEST_FILE_CONTENT = """
-            S,4,Test 1,N,Description 1,5\
+            S,4,Test 1,N,Description 1,null,null,5\
             
-            S,3,Test 3,N,Description 3,5\
+            S,3,Test 3,N,Description 3,null,null,5\
             
-            E,5,Test 1,N,Description 1,\
+            E,5,Test 1,N,Description 1,null,null,\
             
-            T,2,Test 2,N,Description 2,\
+            T,2,Test 2,N,Description 2,2025-10-19T12:30,PT24H,\
             
-            T,1,Test 1,N,Description 1,""";
+            T,1,Test 1,N,Description 1,null,null,""";
+
+    private File tmpFile;
+
+    @Override
+    @BeforeEach
+    public void initManager() {
+        try {
+            // given
+            tmpFile = File.createTempFile(String.valueOf(System.currentTimeMillis()), TEMP_FILE_SUFFIX);
+            manager = Managers.getFileBackedTaskManager(tmpFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Test
     @DisplayName("Проверка сохранения пустого файла(без задач)")
     public void save_SaveEmptyFile_FileIsEmpty() throws IOException {
         // given
-        File tmpFile = File.createTempFile(String.valueOf(System.currentTimeMillis()), TEMP_FILE_SUFFIX);
-        TaskManager manager = Managers.getFileBackedTaskManager(tmpFile);
-        Task task = new Task(TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW);
+        Task task = new Task(TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW, null, null);
         // when
         manager.addNewTask(task);
         manager.deleteTask(task.getId());
@@ -45,9 +58,7 @@ public class FileBackedTaskManagerTest {
 
     @Test
     @DisplayName("Проверка загрузки пустого фала")
-    public void load_LoadEmptyFile_SuccessLoad() throws IOException {
-        // given
-        File tmpFile = File.createTempFile(String.valueOf(System.currentTimeMillis()), TEMP_FILE_SUFFIX);
+    public void load_LoadEmptyFile_SuccessLoad() {
         // when
         Exception loadException = null;
         try {
@@ -63,11 +74,9 @@ public class FileBackedTaskManagerTest {
     @DisplayName("Проверка cохранения задач в файл")
     public void save_SaveSeveralTasksToFile_SuccessFileSave() throws IOException {
         // given
-        File tmpFile = File.createTempFile(String.valueOf(System.currentTimeMillis()), TEMP_FILE_SUFFIX);
-        TaskManager manager = Managers.getFileBackedTaskManager(tmpFile);
-        Task task = new Task(TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW);
-        Subtask task3 = new Subtask(3, TaskStubs.TASK_NAME_3, TaskStubs.TASK_DESCRIPTION_3, TaskStatus.NEW, 5);
-        Subtask task4 = new Subtask(4, TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW, 5);
+        Task task = new Task(TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW, null, null);
+        Subtask task3 = new Subtask(3, TaskStubs.TASK_NAME_3, TaskStubs.TASK_DESCRIPTION_3, TaskStatus.NEW, null, null, 5);
+        Subtask task4 = new Subtask(4, TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW, null, null, 5);
         Epic epic = new Epic(5, TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1);
         // when
         manager.addNewTask(task);
@@ -88,12 +97,11 @@ public class FileBackedTaskManagerTest {
     @DisplayName("Проверка чтения задач из файла")
     public void load_ReadSeveralTasksFromFile_AllTasksRead() throws IOException {
         // given
-        File tmpFile = File.createTempFile(String.valueOf(System.currentTimeMillis()), TEMP_FILE_SUFFIX);
         BufferedWriter bw = new BufferedWriter(new FileWriter(tmpFile));
         bw.write(TEST_FILE_CONTENT);
         bw.close();
         // when
-        TaskManager manager = FileBackedTaskManager.loadFromFile(tmpFile);
+        manager = FileBackedTaskManager.loadFromFile(tmpFile);
         // then
         assertEquals(2, manager.getTasks().size(), "wrong tasks count!");
         assertEquals(2, manager.getSubtasks().size(), "wrong subtasks count!");

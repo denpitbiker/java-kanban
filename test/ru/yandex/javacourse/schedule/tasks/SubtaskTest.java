@@ -14,9 +14,9 @@ public class SubtaskTest {
     @DisplayName("Проверка, что подзадачи сравниваются по id")
     public void equals_SubtaskComparison_Equal() {
         // given
-        Subtask subtask = new Subtask(1, TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW, 2);
+        Subtask subtask = new Subtask(1, TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW, null, null, 2);
         // when
-        Subtask sameIdSubtask = new Subtask(1, TaskStubs.TASK_NAME_2, TaskStubs.TASK_DESCRIPTION_2, TaskStatus.IN_PROGRESS, 2);
+        Subtask sameIdSubtask = new Subtask(1, TaskStubs.TASK_NAME_2, TaskStubs.TASK_DESCRIPTION_2, TaskStatus.IN_PROGRESS, null, null, 2);
         // then
         assertEquals(subtask, sameIdSubtask, "subtask entities should be compared by id");
     }
@@ -27,7 +27,7 @@ public class SubtaskTest {
         // given
         Exception exception = assertThrows(
                 SameIdException.class,
-                () -> new Subtask(1, TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW, 1)
+                () -> new Subtask(1, TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW, null, null, 1)
         );
         // when
         String actualMessage = exception.getMessage();

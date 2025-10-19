@@ -9,129 +9,180 @@ import ru.yandex.javacourse.schedule.tasks.Subtask;
 import ru.yandex.javacourse.schedule.tasks.Task;
 import ru.yandex.javacourse.schedule.tasks.TaskStatus;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class InMemoryTaskManagerTest {
+public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
+    private final Task dateTimeTask = new Task(
+            1,
+            TaskStubs.TASK_NAME_1,
+            TaskStubs.TASK_DESCRIPTION_1,
+            TaskStatus.NEW,
+            TaskStubs.DURATION_1D,
+            TaskStubs.DATE_TIME_19_10_2025_12_30
+    );
 
-    TaskManager manager;
+    private final Task intersectingTask = new Task(
+            2,
+            TaskStubs.TASK_NAME_2,
+            TaskStubs.TASK_DESCRIPTION_2,
+            TaskStatus.NEW,
+            TaskStubs.DURATION_1D,
+            TaskStubs.DATE_TIME_19_10_2025_12_30.plusHours(1)
+    );
 
+    private final Subtask dateTimeSubtask = new Subtask(
+            1,
+            TaskStubs.TASK_NAME_1,
+            TaskStubs.TASK_DESCRIPTION_1,
+            TaskStatus.NEW,
+            TaskStubs.DURATION_1D,
+            TaskStubs.DATE_TIME_19_10_2025_12_30,
+            3
+    );
+
+    private final Subtask intersectingSubtask = new Subtask(
+            2,
+            TaskStubs.TASK_NAME_2,
+            TaskStubs.TASK_DESCRIPTION_2,
+            TaskStatus.NEW,
+            TaskStubs.DURATION_1D,
+            TaskStubs.DATE_TIME_19_10_2025_12_30.plusHours(1),
+            3
+    );
+
+    private final Epic epic = new Epic(
+            3,
+            TaskStubs.TASK_NAME_3,
+            TaskStubs.TASK_DESCRIPTION_3
+    );
+
+    @Override
     @BeforeEach
     public void initManager() {
+        //given
         manager = Managers.getInMemoryTaskManager();
     }
 
     @Test
-    @DisplayName("Проверка получения задачи по id из менеджера задач")
-    public void getTask_GetTaskById_TaskFound() {
-        // given
-        Task task = new Task(TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW);
+    @DisplayName("Проверка защиты от добавления пересекающейся по времени задачи (пересекающаяся начинается позже)")
+    public void addTask_IntersectingAfterTasksAdding_IntersectingTaskNotAdded() {
         // when
-        manager.addNewTask(task);
-        Task byIdTask = manager.getTask(task.getId());
+        manager.addNewTask(dateTimeTask);
+        manager.addNewTask(intersectingTask);
         // then
-        assertEquals(task, byIdTask, "added task id should be found");
+        assertEquals(1, manager.getTasks().size(), "Must be 1 task");
+        assertEquals(1, manager.getTasks().getFirst().getId(), "Must be task with id 1");
     }
 
     @Test
-    @DisplayName("Проверка получения задачи по id из менеджера задач")
-    public void addNewTask_AddTaskWIthNoId_IdGenerated() {
-        // given
-        Task task = new Task(TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW);
+    @DisplayName("Проверка защиты от добавления пересекающейся по времени задачи (пересекающаяся начинается раньше)")
+    public void addTask_IntersectingBeforeTasksAdding_IntersectingTaskNotAdded() {
         // when
-        manager.addNewTask(task);
-        Task addedTask = manager.getTasks().getFirst();
+        manager.addNewTask(dateTimeTask);
+        manager.addNewTask(intersectingTask);
         // then
-        assertEquals(task, addedTask, "added task id should be set");
+        assertEquals(1, manager.getTasks().size(), "Must be 1 task");
+        assertEquals(1, manager.getTasks().getFirst().getId(), "Must be task with id 1");
     }
 
     @Test
-    @DisplayName("Проверка добавления задачи с заданным id")
-    public void addNewTask_AddTaskWithId_TaskAdded() {
-        // when
-        manager.addNewTask(TaskStubs.TASK_STUB_1);
-        Task addedTask = manager.getTasks().getFirst();
-        // then
-        assertEquals(TaskStubs.TASK_STUB_1, addedTask, "predefined task id should be set");
-    }
-
-    @Test
-    @DisplayName("Проверка, что задача не изменилась после добавления в менеджер задач")
-    public void addNewTask_TaskNotChangedAfterAdding_TaskNotChanged() {
+    @DisplayName("Проверка добавления задач, не пересекающихся по времени")
+    public void addTask_NotIntersectingTasksAdding_TasksAdded() {
         // given
-        int id = 1;
-        TaskStatus status = TaskStatus.NEW;
-        Task task1before = new Task(id, TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, status);
+        Task notIntersectingTask = new Task(
+                2,
+                TaskStubs.TASK_NAME_1,
+                TaskStubs.TASK_DESCRIPTION_1,
+                TaskStatus.NEW,
+                TaskStubs.DURATION_1D,
+                TaskStubs.DATE_TIME_19_10_2025_12_30.plusDays(1)
+        );
         // when
-        manager.addNewTask(task1before);
-        Task task1after = manager.getTask(task1before.getId());
-        // then
-        assertEquals(id, task1after.getId());
-        assertEquals(TaskStubs.TASK_DESCRIPTION_1, task1after.getDescription());
-        assertEquals(status, task1after.getStatus());
-        assertEquals(TaskStubs.TASK_NAME_1, task1after.getName());
-    }
-
-    @Test
-    @DisplayName("Проверка добавления-удаления подзадач из эпика через менеджер задач")
-    public void SubtasksAddAndDeleteViaManager_SubtaskAddedAndDeleted() {
-        // given
-        Subtask subtask = new Subtask(1, TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW, 2);
-        Subtask subtask2 = new Subtask(3, TaskStubs.TASK_NAME_3, TaskStubs.TASK_DESCRIPTION_3, TaskStatus.NEW, 2);
-        Epic epic = new Epic(2, TaskStubs.TASK_NAME_2, TaskStubs.TASK_DESCRIPTION_2);
-        // when
-        manager.addNewEpic(epic);
-        manager.addNewSubtask(subtask2);
-        manager.deleteSubtask(subtask.getId());
-        epic = manager.getEpic(epic.getId());
-        // then
-        assertEquals(1, epic.getSubtaskIds().size(), "must be only one id");
-        assertEquals(3, epic.getSubtaskIds().getFirst(), "must be subtask with id 3");
-    }
-
-    @Test
-    @DisplayName("Проверка наполнения менеджера задач")
-    public void FillTaskManager_ManagerFilled() {
-        // given
-        Task task = new Task(TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW);
-        Subtask task3 = new Subtask(3, TaskStubs.TASK_NAME_3, TaskStubs.TASK_DESCRIPTION_3, TaskStatus.NEW, 5);
-        Subtask task4 = new Subtask(4, TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW, 5);
-        Epic epic = new Epic(5, TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1);
-        // when
-        manager.addNewTask(task);
-        manager.addNewTask(TaskStubs.TASK_STUB_2);
-        manager.addNewTask(task);
-        manager.addNewTask(TaskStubs.TASK_STUB_2);
-        manager.addNewEpic(epic);
-        manager.addNewSubtask(task3);
-        manager.addNewSubtask(task4);
+        manager.addNewTask(dateTimeTask);
+        manager.addNewTask(notIntersectingTask);
         // then
         assertEquals(2, manager.getTasks().size(), "Must be 2 tasks");
-        assertEquals(2, manager.getSubtasks().size(), "Must be 2 subtasks");
-        assertEquals(1, manager.getEpics().size(), "Must be 1 epic");
     }
 
     @Test
-    @DisplayName("Проверка очистки менеджера задач")
-    public void CleanTaskManager_ManagerCleared() {
+    @DisplayName("Проверка защиты от добавления пересекающейся по времени подзадачи (пересекающаяся начинается позже)")
+    public void addSubtask_IntersectingAfterSubtasksAdding_IntersectingSubtaskNotAdded() {
         // given
-        Task task = new Task(TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW);
-        Subtask task3 = new Subtask(3, TaskStubs.TASK_NAME_3, TaskStubs.TASK_DESCRIPTION_3, TaskStatus.NEW, 5);
-        Subtask task4 = new Subtask(4, TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1, TaskStatus.NEW, 5);
-        Epic epic = new Epic(5, TaskStubs.TASK_NAME_1, TaskStubs.TASK_DESCRIPTION_1);
-        // when
-        manager.addNewTask(task);
-        manager.addNewTask(TaskStubs.TASK_STUB_2);
-        manager.addNewTask(task);
-        manager.addNewTask(TaskStubs.TASK_STUB_2);
         manager.addNewEpic(epic);
-        manager.addNewSubtask(task3);
-        manager.addNewSubtask(task4);
+        // when
+        manager.addNewSubtask(dateTimeSubtask);
+        manager.addNewSubtask(intersectingSubtask);
         // then
-        manager.deleteTasks();
-        assertEquals(0, manager.getTasks().size(), "Must be 0 tasks");
-        manager.deleteSubtasks();
-        assertEquals(0, manager.getSubtasks().size(), "Must be 0 subtasks");
-        manager.deleteEpics();
-        assertEquals(0, manager.getEpics().size(), "Must be 0 epics");
+        assertEquals(1, manager.getSubtasks().size(), "Must be 1 task");
+        assertEquals(1, manager.getSubtasks().getFirst().getId(), "Must be task with id 1");
+    }
+
+    @Test
+    @DisplayName("Проверка защиты от добавления пересекающейся по времени подзадачи (пересекающаяся начинается раньше)")
+    public void addSubtask_IntersectingBeforeSubtasksAdding_IntersectingSubtaskNotAdded() {
+        // given
+        manager.addNewEpic(epic);
+        // when
+        manager.addNewSubtask(dateTimeSubtask);
+        manager.addNewSubtask(intersectingSubtask);
+        // then
+        assertEquals(1, manager.getSubtasks().size(), "Must be 1 task");
+        assertEquals(1, manager.getSubtasks().getFirst().getId(), "Must be task with id 1");
+    }
+
+    @Test
+    @DisplayName("Проверка добавления подзадач, не пересекающихся по времени")
+    public void addSubtask_NotIntersectingSubtasksAdding_SubtasksAdded() {
+        // given
+        Subtask notIntersectingSubtask = new Subtask(
+                2,
+                TaskStubs.TASK_NAME_1,
+                TaskStubs.TASK_DESCRIPTION_1,
+                TaskStatus.NEW,
+                TaskStubs.DURATION_1D,
+                TaskStubs.DATE_TIME_19_10_2025_12_30.plusDays(1),
+                3
+        );
+        manager.addNewEpic(epic);
+        // when
+        manager.addNewSubtask(dateTimeSubtask);
+        manager.addNewSubtask(notIntersectingSubtask);
+        // then
+        assertEquals(2, manager.getSubtasks().size(), "Must be 2 tasks");
+    }
+
+    @Test
+    @DisplayName("Проверка получения списка задач, осортированных по приоритету (времени)")
+    public void getPrioritizedTasks_GetPrioritizedTasks_PrioritizedTasksList() {
+        // given
+        Subtask notIntersectingSubtask = new Subtask(
+                2,
+                TaskStubs.TASK_NAME_1,
+                TaskStubs.TASK_DESCRIPTION_1,
+                TaskStatus.NEW,
+                TaskStubs.DURATION_1D,
+                TaskStubs.DATE_TIME_19_10_2025_12_30.plusDays(1),
+                3
+        );
+        Task notIntersectingTask = new Task(
+                4,
+                TaskStubs.TASK_NAME_3,
+                TaskStubs.TASK_DESCRIPTION_3,
+                TaskStatus.NEW,
+                TaskStubs.DURATION_1D,
+                TaskStubs.DATE_TIME_19_10_2025_12_30.plusDays(5)
+        );
+        manager.addNewEpic(epic);
+        // when
+        manager.addNewTask(notIntersectingTask);
+        manager.addNewSubtask(notIntersectingSubtask);
+        manager.addNewSubtask(dateTimeSubtask);
+        // then
+        List<Task> prioritizedTasks = manager.getPrioritizedTasks();
+        assertEquals(3, prioritizedTasks.size(), "Must be 3 tasks");
+        assertEquals(1, prioritizedTasks.getFirst().getId(), "Must be subtask with id = 1");
+        assertEquals(4, prioritizedTasks.getLast().getId(), "Must be task with id = 4");
     }
 }

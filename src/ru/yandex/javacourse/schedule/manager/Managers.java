@@ -13,11 +13,11 @@ public class Managers {
         return new InMemoryTaskManager();
     }
 
-    public static TaskManager getInMemoryTaskManager() {
+    public static InMemoryTaskManager getInMemoryTaskManager() {
         return new InMemoryTaskManager();
     }
 
-    public static TaskManager getFileBackedTaskManager(File file) {
+    public static FileBackedTaskManager getFileBackedTaskManager(File file) {
         return FileBackedTaskManager.loadFromFile(file);
     }
 
