@@ -43,6 +43,7 @@ public class Epic extends Task implements Cloneable {
 	}
 
 	public void setEndTime(LocalDateTime endTime) {
+		if (endTime == null) return;
 		this.endTime = endTime;
 	}
 

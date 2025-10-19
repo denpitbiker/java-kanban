@@ -60,6 +60,7 @@ public class Task implements Cloneable {
     }
 
     public void setStatus(TaskStatus status) {
+        if (status == null) return;
         this.status = status;
     }
 
@@ -76,6 +77,7 @@ public class Task implements Cloneable {
     }
 
     public void setDuration(Duration duration) {
+        if (duration == null) return;
         this.duration = duration;
     }
 
@@ -84,6 +86,7 @@ public class Task implements Cloneable {
     }
 
     public void setStartTime(LocalDateTime startTime) {
+        if (startTime == null) return;
         this.startTime = startTime;
     }
 

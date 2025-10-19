@@ -12,6 +12,7 @@ import ru.yandex.javacourse.schedule.tasks.Task;
  * @author Vladimir Ivanov (ivanov.vladimir.l@gmail.com)
  */
 public interface TaskManager {
+
 	List<Task> getTasks();
 
 	List<Subtask> getSubtasks();
@@ -19,6 +20,8 @@ public interface TaskManager {
 	List<Epic> getEpics();
 
 	List<Subtask> getEpicSubtasks(int epicId);
+
+	List<Task> getPrioritizedTasks();
 
 	Task getTask(int id);
 
