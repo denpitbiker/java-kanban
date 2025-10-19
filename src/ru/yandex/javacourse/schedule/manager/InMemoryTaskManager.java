@@ -46,7 +46,6 @@ public class InMemoryTaskManager implements TaskManager {
         return new ArrayList<>(epic.getSubtaskIds().stream().map((id) -> subtasks.get(id).clone()).toList());
     }
 
-    @Override
     public List<Task> getPrioritizedTasks() {
         return prioritizedTasks.stream().toList();
     }
@@ -187,7 +186,8 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteTask(int id) {
         Task removedTask = tasks.remove(id);
-        if (removedTask != null) prioritizedTasks.remove(removedTask);
+        if (removedTask == null) return;
+        if (removedTask.getStartTime() != null) prioritizedTasks.remove(removedTask);
         historyManager.remove(id);
     }
 
@@ -197,7 +197,7 @@ public class InMemoryTaskManager implements TaskManager {
         historyManager.remove(id);
         for (Integer subtaskId : epic.getSubtaskIds()) {
             Subtask removedSubtask = subtasks.remove(subtaskId);
-            prioritizedTasks.remove(removedSubtask);
+            if (removedSubtask.getStartTime() != null) prioritizedTasks.remove(removedSubtask);
             historyManager.remove(subtaskId);
         }
     }
@@ -206,7 +206,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteSubtask(int id) {
         Subtask removedSubtask = subtasks.remove(id);
         if (removedSubtask == null) return;
-        prioritizedTasks.remove(removedSubtask);
+        if (removedSubtask.getStartTime() != null) prioritizedTasks.remove(removedSubtask);
         historyManager.remove(id);
         Epic epic = epics.get(removedSubtask.getEpicId());
         epic.removeSubtask(id);
@@ -217,7 +217,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteTasks() {
         for (Task t : tasks.values()) {
             historyManager.remove(t.getId());
-            prioritizedTasks.remove(t);
+            if (t.getStartTime() != null) prioritizedTasks.remove(t);
         }
         tasks.clear();
     }
@@ -230,7 +230,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         for (Task t : subtasks.values()) {
             historyManager.remove(t.getId());
-            prioritizedTasks.remove(t);
+            if (t.getStartTime() != null) prioritizedTasks.remove(t);
         }
         subtasks.clear();
     }
@@ -243,7 +243,7 @@ public class InMemoryTaskManager implements TaskManager {
         epics.clear();
         for (Task t : subtasks.values()) {
             historyManager.remove(t.getId());
-            prioritizedTasks.remove(t);
+            if (t.getStartTime() != null) prioritizedTasks.remove(t);
         }
         subtasks.clear();
     }
@@ -255,14 +255,14 @@ public class InMemoryTaskManager implements TaskManager {
 
     private boolean hasTimeIntersection(Task inputTask) {
         if (inputTask.getStartTime() == null) return false;
-        return prioritizedTasks.stream().noneMatch(task -> {
-                    if (inputTask.getEndTime() == null || task.getEndTime() == null) {
-                        return inputTask.getStartTime().isEqual(task.getStartTime());
+        return prioritizedTasks.stream().anyMatch(prioritizedTask -> {
+                    if (inputTask.getEndTime() == null || prioritizedTask.getEndTime() == null) {
+                        return inputTask.getStartTime().isEqual(prioritizedTask.getStartTime());
                     } else {
-                        return inputTask.getEndTime().isAfter(task.getStartTime()) &&
-                                inputTask.getStartTime().isBefore(task.getStartTime()) ||
-                                task.getEndTime().isAfter(inputTask.getStartTime()) &&
-                                        task.getStartTime().isBefore(inputTask.getStartTime());
+                        return inputTask.getEndTime().isAfter(prioritizedTask.getStartTime()) &&
+                                inputTask.getStartTime().isBefore(prioritizedTask.getStartTime()) ||
+                                prioritizedTask.getEndTime().isAfter(inputTask.getStartTime()) &&
+                                        prioritizedTask.getStartTime().isBefore(inputTask.getStartTime());
                     }
                 }
         );

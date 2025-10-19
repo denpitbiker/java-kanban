@@ -77,6 +77,7 @@ public class Epic extends Task implements Cloneable {
 		}
 		clone.setDuration(duration);
 		clone.setStartTime(startTime);
+		clone.setEndTime(endTime);
 		return clone;
 	}
 }
