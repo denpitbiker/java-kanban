@@ -37,13 +37,13 @@ public class SubtasksHttpHandler extends BaseHttpHandler {
 
     private void handleGet(HttpExchange exchange, String[] segments) throws IOException {
         switch (segments.length) {
-            case 1: {
+            case 2: {
                 sendText(exchange, gson.toJson(manager.getSubtasks()));
                 break;
             }
-            case 2: {
+            case 3: {
                 try {
-                    sendText(exchange, gson.toJson(manager.getSubtask(Integer.parseInt(segments[1]))));
+                    sendText(exchange, gson.toJson(manager.getSubtask(Integer.parseInt(segments[2]))));
                 } catch (TaskNotFoundException e) {
                     sendNotFound(exchange);
                 } catch (Exception e) {
@@ -58,12 +58,16 @@ public class SubtasksHttpHandler extends BaseHttpHandler {
     }
 
     private void handlePost(HttpExchange exchange, String[] segments) throws IOException {
-        if (segments.length == 1) {
+        if (segments.length == 2) {
             try {
                 Subtask subtask = parseHelper.parse(exchange, gson, Subtask.class);
                 try {
-                    manager.getSubtask(subtask.getId());
-                    manager.updateSubtask(subtask);
+                    if (subtask.getId() != null) {
+                        manager.getSubtask(subtask.getId());
+                        manager.updateSubtask(subtask);
+                    } else {
+                        manager.addNewSubtask(subtask);
+                    }
                     sendSuccessCreation(exchange);
                 } catch (TaskNotFoundException e) {
                     if (manager.addNewSubtask(subtask) == null) {
@@ -81,9 +85,9 @@ public class SubtasksHttpHandler extends BaseHttpHandler {
     }
 
     private void handleDelete(HttpExchange exchange, String[] segments) throws IOException {
-        if (segments.length == 2) {
+        if (segments.length == 3) {
             try {
-                manager.deleteSubtask(Integer.parseInt(segments[1]));
+                manager.deleteSubtask(Integer.parseInt(segments[2]));
                 sendSuccessCode(exchange);
             } catch (TaskNotFoundException e) {
                 sendNotFound(exchange);

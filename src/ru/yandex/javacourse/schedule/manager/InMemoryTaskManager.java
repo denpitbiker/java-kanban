@@ -41,9 +41,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public ArrayList<Subtask> getEpicSubtasks(int epicId) {
         Epic epic = epics.get(epicId);
-        if (epic == null) {
-            return null;
-        }
+        if (epic == null) throw new TaskNotFoundException(epicId);
         return new ArrayList<>(epic.getSubtaskIds().stream().map((id) -> subtasks.get(id).clone()).toList());
     }
 

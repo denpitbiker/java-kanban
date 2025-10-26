@@ -37,13 +37,13 @@ public class TasksHttpHandler extends BaseHttpHandler {
 
     private void handleGet(HttpExchange exchange, String[] segments) throws IOException {
         switch (segments.length) {
-            case 1: {
+            case 2: {
                 sendText(exchange, gson.toJson(manager.getTasks()));
                 break;
             }
-            case 2: {
+            case 3: {
                 try {
-                    sendText(exchange, gson.toJson(manager.getTask(Integer.parseInt(segments[1]))));
+                    sendText(exchange, gson.toJson(manager.getTask(Integer.parseInt(segments[2]))));
                 } catch (TaskNotFoundException e) {
                     sendNotFound(exchange);
                 } catch (Exception e) {
@@ -58,12 +58,16 @@ public class TasksHttpHandler extends BaseHttpHandler {
     }
 
     private void handlePost(HttpExchange exchange, String[] segments) throws IOException {
-        if (segments.length == 1) {
+        if (segments.length == 2) {
             try {
                 Task task = parseHelper.parse(exchange, gson, Task.class);
                 try {
-                    manager.getTask(task.getId());
-                    manager.updateTask(task);
+                    if (task.getId() != null) {
+                        manager.getTask(task.getId());
+                        manager.updateTask(task);
+                    } else {
+                        manager.addNewTask(task);
+                    }
                     sendSuccessCreation(exchange);
                 } catch (TaskNotFoundException e) {
                     if (manager.addNewTask(task) == null) {
@@ -81,9 +85,9 @@ public class TasksHttpHandler extends BaseHttpHandler {
     }
 
     private void handleDelete(HttpExchange exchange, String[] segments) throws IOException {
-        if (segments.length == 2) {
+        if (segments.length == 3) {
             try {
-                manager.deleteTask(Integer.parseInt(segments[1]));
+                manager.deleteTask(Integer.parseInt(segments[2]));
                 sendSuccessCode(exchange);
             } catch (TaskNotFoundException e) {
                 sendNotFound(exchange);

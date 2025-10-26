@@ -19,7 +19,7 @@ public class PrioritizedHttpHandler extends BaseHttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (exchange.getRequestMethod().equals(NetworkRequestMethod.GET.name)) {
-            if (getPathSegments(exchange).length == 1) {
+            if (getPathSegments(exchange).length == 2) {
                 sendText(exchange, gson.toJson(manager.getPrioritizedTasks()));
             } else {
                 sendNotFound(exchange);

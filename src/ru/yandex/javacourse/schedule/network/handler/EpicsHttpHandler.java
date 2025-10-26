@@ -37,13 +37,13 @@ public class EpicsHttpHandler extends BaseHttpHandler {
 
     private void handleGet(HttpExchange exchange, String[] segments) throws IOException {
         switch (segments.length) {
-            case 1: {
+            case 2: {
                 sendText(exchange, gson.toJson(manager.getEpics()));
                 break;
             }
-            case 2: {
+            case 3: {
                 try {
-                    sendText(exchange, gson.toJson(manager.getEpic(Integer.parseInt(segments[1]))));
+                    sendText(exchange, gson.toJson(manager.getEpic(Integer.parseInt(segments[2]))));
                 } catch (TaskNotFoundException e) {
                     sendNotFound(exchange);
                 } catch (Exception e) {
@@ -51,9 +51,9 @@ public class EpicsHttpHandler extends BaseHttpHandler {
                 }
                 break;
             }
-            case 3: {
+            case 4: {
                 try {
-                    sendText(exchange, gson.toJson(manager.getEpicSubtasks(Integer.parseInt(segments[1]))));
+                    sendText(exchange, gson.toJson(manager.getEpicSubtasks(Integer.parseInt(segments[2]))));
                 } catch (TaskNotFoundException e) {
                     sendNotFound(exchange);
                 } catch (Exception e) {
@@ -68,12 +68,16 @@ public class EpicsHttpHandler extends BaseHttpHandler {
     }
 
     private void handlePost(HttpExchange exchange, String[] segments) throws IOException {
-        if (segments.length == 1) {
+        if (segments.length == 2) {
             try {
                 Epic epic = parseHelper.parse(exchange, gson, Epic.class);
                 try {
-                    manager.getEpic(epic.getId());
-                    manager.updateEpic(epic);
+                    if (epic.getId() != null) {
+                        manager.getEpic(epic.getId());
+                        manager.updateEpic(epic);
+                    } else {
+                        manager.addNewEpic(epic);
+                    }
                     sendSuccessCreation(exchange);
                 } catch (TaskNotFoundException e) {
                     if (manager.addNewEpic(epic) == null) {
@@ -91,9 +95,9 @@ public class EpicsHttpHandler extends BaseHttpHandler {
     }
 
     private void handleDelete(HttpExchange exchange, String[] segments) throws IOException {
-        if (segments.length == 2) {
+        if (segments.length == 3) {
             try {
-                manager.deleteEpic(Integer.parseInt(segments[1]));
+                manager.deleteEpic(Integer.parseInt(segments[2]));
                 sendSuccessCode(exchange);
             } catch (TaskNotFoundException e) {
                 sendNotFound(exchange);
