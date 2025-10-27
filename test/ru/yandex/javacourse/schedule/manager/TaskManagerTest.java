@@ -81,6 +81,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic(2, TaskStubs.TASK_NAME_2, TaskStubs.TASK_DESCRIPTION_2);
         // when
         manager.addNewEpic(epic);
+        manager.addNewSubtask(subtask);
         manager.addNewSubtask(subtask2);
         manager.deleteSubtask(subtask.getId());
         epic = manager.getEpic(epic.getId());
